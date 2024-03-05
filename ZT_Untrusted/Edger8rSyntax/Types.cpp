@@ -29,49 +29,47 @@
  *
  */
 
-
 #include "../App.h"
 #include "../Enclave_u.h"
 
 /* edger8r_type_attributes:
  *   Invokes ECALLs declared with basic types.
  */
-void edger8r_type_attributes(void)
-{
-    sgx_status_t ret = SGX_ERROR_UNEXPECTED;
+void edger8r_type_attributes(void) {
+  sgx_status_t ret = SGX_ERROR_UNEXPECTED;
 
-    ret = ecall_type_char(global_eid, (char)0x12);
-    if (ret != SGX_SUCCESS)
-        abort();
+  ret = ecall_type_char(global_eid, (char)0x12);
+  if (ret != SGX_SUCCESS)
+    abort();
 
-    ret = ecall_type_int(global_eid, (int)1234);
-    if (ret != SGX_SUCCESS)
-        abort();
+  ret = ecall_type_int(global_eid, (int)1234);
+  if (ret != SGX_SUCCESS)
+    abort();
 
-    ret = ecall_type_float(global_eid, (float)1234.0);
-    if (ret != SGX_SUCCESS)
-        abort();
+  ret = ecall_type_float(global_eid, (float)1234.0);
+  if (ret != SGX_SUCCESS)
+    abort();
 
-    ret = ecall_type_double(global_eid, (double)1234.5678);
-    if (ret != SGX_SUCCESS)
-        abort();
+  ret = ecall_type_double(global_eid, (double)1234.5678);
+  if (ret != SGX_SUCCESS)
+    abort();
 
-    ret = ecall_type_size_t(global_eid, (size_t)12345678);
-    if (ret != SGX_SUCCESS)
-        abort();
+  ret = ecall_type_size_t(global_eid, (size_t)12345678);
+  if (ret != SGX_SUCCESS)
+    abort();
 
-    ret = ecall_type_wchar_t(global_eid, (wchar_t)0x1234);
-    if (ret != SGX_SUCCESS)
-        abort();
+  ret = ecall_type_wchar_t(global_eid, (wchar_t)0x1234);
+  if (ret != SGX_SUCCESS)
+    abort();
 
-    struct struct_foo_t g = {1234, 5678};
-    ret = ecall_type_struct(global_eid, g);
-    if (ret != SGX_SUCCESS)
-        abort();
-    
-    union union_foo_t val = {0};
-    ret = ecall_type_enum_union(global_eid, ENUM_FOO_0, &val);
-    if (ret != SGX_SUCCESS)
-        abort();
-    assert(val.union_foo_0 == 2);
+  struct struct_foo_t g = {1234, 5678};
+  ret = ecall_type_struct(global_eid, g);
+  if (ret != SGX_SUCCESS)
+    abort();
+
+  union union_foo_t val = {0};
+  ret = ecall_type_enum_union(global_eid, ENUM_FOO_0, &val);
+  if (ret != SGX_SUCCESS)
+    abort();
+  assert(val.union_foo_0 == 2);
 }

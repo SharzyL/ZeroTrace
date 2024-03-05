@@ -29,7 +29,6 @@
  *
  */
 
-
 #include "../App.h"
 #include "../Enclave_u.h"
 
@@ -39,34 +38,32 @@
  *   Invokes ECALL declared with calling convention attributes.
  *   Invokes ECALL declared with [public].
  */
-void edger8r_function_attributes(void)
-{
-    sgx_status_t ret = SGX_ERROR_UNEXPECTED;
+void edger8r_function_attributes(void) {
+  sgx_status_t ret = SGX_ERROR_UNEXPECTED;
 
-    ret = ecall_function_calling_convs(global_eid);
-    if (ret != SGX_SUCCESS)
-        abort();
-    
-    ret = ecall_function_public(global_eid);
-    if (ret != SGX_SUCCESS)
-        abort();
-    
-    /* user shall not invoke private function here */
-    int runned = 0;
-    ret = ecall_function_private(global_eid, &runned);
-    if (ret != SGX_ERROR_ECALL_NOT_ALLOWED || runned != 0)
-        abort();
+  ret = ecall_function_calling_convs(global_eid);
+  if (ret != SGX_SUCCESS)
+    abort();
+
+  ret = ecall_function_public(global_eid);
+  if (ret != SGX_SUCCESS)
+    abort();
+
+  /* user shall not invoke private function here */
+  int runned = 0;
+  ret = ecall_function_private(global_eid, &runned);
+  if (ret != SGX_ERROR_ECALL_NOT_ALLOWED || runned != 0)
+    abort();
 }
 
 /* ocall_function_allow:
  *   The OCALL invokes the [allow]ed ECALL 'edger8r_private'.
  */
-void ocall_function_allow(void)
-{
-    int runned = 0;
-    sgx_status_t ret = SGX_ERROR_UNEXPECTED;
-    
-    ret = ecall_function_private(global_eid, &runned);
-    if (ret != SGX_SUCCESS || runned != 1)
-        abort();
+void ocall_function_allow(void) {
+  int runned = 0;
+  sgx_status_t ret = SGX_ERROR_UNEXPECTED;
+
+  ret = ecall_function_private(global_eid, &runned);
+  if (ret != SGX_SUCCESS || runned != 1)
+    abort();
 }

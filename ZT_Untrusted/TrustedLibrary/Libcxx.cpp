@@ -37,15 +37,14 @@
 /* ecall_libcxx_functions:
  *   Invokes standard C++ functions.
  */
-void ecall_libcxx_functions(void)
-{
-    sgx_status_t ret = SGX_ERROR_UNEXPECTED;
+void ecall_libcxx_functions(void) {
+  sgx_status_t ret = SGX_ERROR_UNEXPECTED;
 
-    ret = ecall_exception(global_eid);
-    if (ret != SGX_SUCCESS)
-        abort();
+  ret = ecall_exception(global_eid);
+  if (ret != SGX_SUCCESS)
+    abort();
 
-    ret = ecall_map(global_eid);
-    if (ret != SGX_SUCCESS)
-        abort();
+  ret = ecall_map(global_eid);
+  if (ret != SGX_SUCCESS)
+    abort();
 }
