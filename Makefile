@@ -31,14 +31,14 @@
 
 NASM ?= nasm
 NASM_Flags ?= -f elf64
-UNTRUSTED_DIR = /home/ssasy/Projects/oram_tester/eleos/eleos_core/trustedlib_lib_services/untrusted
-COMMON_ELEOS = /home/ssasy/Projects/oram_tester/eleos/eleos_core/trustedlib_lib_services/common
+UNTRUSTED_DIR = build/untrusted_dir
+COMMON_ELEOS = build/common_eleos
 
 ######## SGX SDK Settings ########
 
-SGX_SDK ?= /opt/intel/sgxsdk
-SGX_SSL ?= /opt/intel/sgxssl
-SGX_MODE ?= HW
+SGX_SDK ?=
+SGX_SSL ?=
+SGX_MODE ?= SIM  # not using HW
 SGX_ARCH ?= x64
 SGX_DEBUG ?= 1
 
@@ -140,12 +140,10 @@ else
 	Service_Library_Name := sgx_tservice
 endif
 Crypto_Library_Name := sgx_tcrypto
-services_lib = /home/ssasy/Projects/oram_tester/eleos/eleos_core/trustedlib_lib_services
-SGXSSL_INCLUDE_PATH := /opt/intel/sgxssl/include
+SGXSSL_INCLUDE_PATH := $(SGX_SSL)/include
 
 Enclave_Cpp_Files := ZT_Enclave/Globals_Enclave.cpp ZT_Enclave/ZT_Enclave.cpp ZT_Enclave/Enclave_utils.cpp ZT_Enclave/Block.cpp ZT_Enclave/Bucket.cpp ZT_Enclave/Stash.cpp ZT_Enclave/ORAMTree.cpp ZT_Enclave/PathORAM_Enclave.cpp ZT_Enclave/CircuitORAM_Enclave.cpp ZT_Enclave/LinearScan_ORAM.cpp $(wildcard ZT_Enclave/Edger8rSyntax/*.cpp) $(wildcard ZT_Enclave/TrustedLibrary/*.cpp)
 Enclave_Include_Paths := -IInclude -IEnclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/libcxx -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport -I$(SGXSSL_INCLUDE_PATH) 
-#-I$(services_lib)/static_trusted -I$(services_lib)/common
 
 Enclave_C_Flags := $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fpie -fstack-protector $(Enclave_Include_Paths)
 Enclave_Cpp_Flags := $(Enclave_C_Flags) -std=c++11 -nostdinc++
@@ -239,7 +237,7 @@ $(UNTRUSTED_DIR)/lib_services_u.o: $(UNTRUSTED_DIR)/lib_services_u.c
 #	@$(CXX) $(App_Cpp_Flags) -c $< -o $@ $(App_Link_Flags)
 #	@echo "CXX  <=  $<"	
 	
-$(UNTRUSTED_DIR)/%.o: $(UNTRUSTED_DIR)/%.cpp
+$(UNTRUSTED_DIR)/%.o: $(UNTRUSTED_DIR)/%.cpp ZT_Untrusted/Enclave_u.o
 	@$(CXX) $(App_Cpp_Flags) -c $< -o $@ $(App_Link_Flags)
 	@echo "CXX  <=  $<"
 	
@@ -255,11 +253,11 @@ ZT_Untrusted/Enclave_u.o: ZT_Untrusted/Enclave_u.c
 	@$(CC) $(App_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
-ZT_Untrusted/%.o: ZT_Untrusted/%.cpp
+ZT_Untrusted/%.o: ZT_Untrusted/%.cpp ZT_Untrusted/Enclave_u.o
 	@$(CXX) $(App_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
-$(App_Name): ZT_Untrusted/Enclave_u.o $(App_Cpp_Objects)
+$(App_Name): ZT_Untrusted/Enclave_u.o $(App_Cpp_Objects) ZT_Untrusted/Enclave_u.o
 	#To build a stand alone (non-lib) ZeroTrace:
 	#@$(CXX) $^ -o $@ $(App_Link_Flags)
 	#To build a dynamic-linked library ZeroTrace:
@@ -284,9 +282,9 @@ ZT_Enclave/Enclave_t.o: ZT_Enclave/Enclave_t.c
 	@echo "CC   <=  $<"
 	
 ZT_Enclave/oblivious_functions.o: ZT_Enclave/oblivious_functions.asm
-	@$(NASM) $(NASM_Flags) $< -o $@  
+	@$(NASM) $(NASM_Flags) $< -o $@
 
-ZT_Enclave/%.o: ZT_Enclave/%.cpp $(Enclave_Asm_Objects)
+ZT_Enclave/%.o: ZT_Enclave/%.cpp $(Enclave_Asm_Objects) ZT_Enclave/Enclave_t.o
 	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
@@ -304,5 +302,5 @@ $(Signed_Enclave_Name): $(Enclave_Name)
 .PHONY: clean
 
 clean:
-	@rm -f .config_* $(App_Name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_Cpp_Objects) ZT_Untrusted/Enclave_u.* $(Enclave_Cpp_Objects) ZT_Enclave/Enclave_t.*
+	rm -f .config_* $(App_Name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_Cpp_Objects) ZT_Untrusted/Enclave_u.* $(Enclave_Cpp_Objects) ZT_Enclave/Enclave_t.*
 
