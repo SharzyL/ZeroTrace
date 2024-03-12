@@ -17,13 +17,13 @@
 #
 
 #N = Number of data blocks
-N=1000
+N=1024
 #no_of_req
-no_of_req=1
+no_of_req=3
 #stash_size
 #Note refer to PathORAM and CircuitORAM papers to understand stash size bounds.
 #It is typically sufficient to use 150 for PathORAM and 10 for CircuitORAM
-stash_size=150
+stash_size=200
 #block_size
 block_size=128
 #new/resume

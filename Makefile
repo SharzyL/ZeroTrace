@@ -38,28 +38,28 @@ COMMON_ELEOS = build/common_eleos
 
 SGX_SDK ?=
 SGX_SSL ?=
-SGX_MODE ?= SIM  # not using HW
+SGX_MODE ?= HW  # not using HW
 SGX_ARCH ?= x64
-SGX_DEBUG ?= 1
+SGX_DEBUG ?= 0
 
 ifeq ($(shell getconf LONG_BIT), 32)
-	SGX_ARCH := x86
+  SGX_ARCH := x86
 else ifeq ($(findstring -m32, $(CXXFLAGS)), -m32)
-	SGX_ARCH := x86
+  SGX_ARCH := x86
 endif
 
 ifeq ($(SGX_ARCH), x86)
-	SGX_COMMON_CFLAGS := -m32
-	SGX_LIBRARY_PATH := $(SGX_SDK)/lib
-	SGX_SSL_LIBRARY_PATH := $(SGX_SSL)/lib
-	SGX_ENCLAVE_SIGNER := $(SGX_SDK)/bin/x86/sgx_sign
-	SGX_EDGER8R := $(SGX_SDK)/bin/x86/sgx_edger8r
+  SGX_COMMON_CFLAGS := -m32
+  SGX_LIBRARY_PATH := $(SGX_SDK)/lib
+  SGX_SSL_LIBRARY_PATH := $(SGX_SSL)/lib
+  SGX_ENCLAVE_SIGNER := $(SGX_SDK)/bin/x86/sgx_sign
+  SGX_EDGER8R := $(SGX_SDK)/bin/x86/sgx_edger8r
 else
-	SGX_COMMON_CFLAGS := -m64
-	SGX_LIBRARY_PATH := $(SGX_SDK)/lib64
-	SGX_SSL_LIBRARY_PATH := $(SGX_SSL)/lib64
-	SGX_ENCLAVE_SIGNER := $(SGX_SDK)/bin/x64/sgx_sign
-	SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
+  SGX_COMMON_CFLAGS := -m64
+  SGX_LIBRARY_PATH := $(SGX_SDK)/lib64
+  SGX_SSL_LIBRARY_PATH := $(SGX_SSL)/lib64
+  SGX_ENCLAVE_SIGNER := $(SGX_SDK)/bin/x64/sgx_sign
+  SGX_EDGER8R := $(SGX_SDK)/bin/x64/sgx_edger8r
 endif
 
 ifeq ($(SGX_DEBUG), 1)
@@ -69,28 +69,22 @@ endif
 endif
 
 ifeq ($(SGX_DEBUG), 1)
-        SGX_COMMON_CFLAGS += -O0 -g
+  SGX_COMMON_CFLAGS += -O0 -g -Wno-deprecated-declarations -Wno-cpp
+  SGXSSL_Library_Name := sgx_tsgxssld
+  OpenSSL_Crypto_Library_Name := sgx_tsgxssl_cryptod
 else
-        SGX_COMMON_CFLAGS += -O2
-endif
-
-ifeq ($(SGX_DEBUG), 1)
-        SGX_COMMON_CFLAGS += -O0 -g
-                SGXSSL_Library_Name := sgx_tsgxssld
-                OpenSSL_Crypto_Library_Name := sgx_tsgxssl_cryptod
-else
-        SGX_COMMON_CFLAGS += -O2 -D_FORTIFY_SOURCE=2
-                SGXSSL_Library_Name := sgx_tsgxssl
-                OpenSSL_Crypto_Library_Name := sgx_tsgxssl_crypto
+  SGX_COMMON_CFLAGS += -O2 -D_FORTIFY_SOURCE=2
+  SGXSSL_Library_Name := sgx_tsgxssl
+  OpenSSL_Crypto_Library_Name := sgx_tsgxssl_crypto
 endif
 
 
 ######## App Settings ########
 
 ifneq ($(SGX_MODE), HW)
-	Urts_Library_Name := sgx_urts_sim
+  Urts_Library_Name := sgx_urts_sim
 else
-	Urts_Library_Name := sgx_urts
+  Urts_Library_Name := sgx_urts
 endif
 
 ZT_LIBRARY_PATH := ./Sample_App/
@@ -121,9 +115,9 @@ Lib_services_Cpp_Files := $(wildcard common/*.cpp) $(wildcard untrusted/*.cpp)
 Lib_services_Cpp_Objects := $(Lib_services_Cpp_Files:.cpp=.o)
 
 ifneq ($(SGX_MODE), HW)
-	App_Link_Flags += -lsgx_uae_service_sim
+  App_Link_Flags += -lsgx_uae_service_sim
 else
-	App_Link_Flags += -lsgx_uae_service
+  App_Link_Flags += -lsgx_uae_service
 endif
 
 App_Cpp_Objects := $(App_Cpp_Files:.cpp=.o)
@@ -133,11 +127,11 @@ App_Name := app
 ######## Enclave Settings ########
 
 ifneq ($(SGX_MODE), HW)
-	Trts_Library_Name := sgx_trts_sim
-	Service_Library_Name := sgx_tservice_sim
+  Trts_Library_Name := sgx_trts_sim
+  Service_Library_Name := sgx_tservice_sim
 else
-	Trts_Library_Name := sgx_trts
-	Service_Library_Name := sgx_tservice
+  Trts_Library_Name := sgx_trts
+  Service_Library_Name := sgx_tservice
 endif
 Crypto_Library_Name := sgx_tcrypto
 SGXSSL_INCLUDE_PATH := $(SGX_SSL)/include
@@ -174,19 +168,19 @@ Enclave_Config_File := ZT_Enclave/Enclave.config.xml
 
 ifeq ($(SGX_MODE), HW)
 ifeq ($(SGX_DEBUG), 1)
-	Build_Mode = HW_DEBUG
+  Build_Mode = HW_DEBUG
 else ifeq ($(SGX_PRERELEASE), 1)
-	Build_Mode = HW_PRERELEASE
+  Build_Mode = HW_PRERELEASE
 else
-	Build_Mode = HW_RELEASE
+  Build_Mode = HW_RELEASE
 endif
 else
 ifeq ($(SGX_DEBUG), 1)
-	Build_Mode = SIM_DEBUG
+  Build_Mode = SIM_DEBUG
 else ifeq ($(SGX_PRERELEASE), 1)
-	Build_Mode = SIM_PRERELEASE
+  Build_Mode = SIM_PRERELEASE
 else
-	Build_Mode = SIM_RELEASE
+  Build_Mode = SIM_RELEASE
 endif
 endif
 
@@ -230,16 +224,14 @@ $(UNTRUSTED_DIR)/lib_services_u.c: $(SGX_EDGER8R) static_trusted/lib_services.ed
 	@echo "GEN  =>  $@"
 
 $(UNTRUSTED_DIR)/lib_services_u.o: $(UNTRUSTED_DIR)/lib_services_u.c
-	@$(CC) $(App_C_Flags) -c $< -o $@ $(App_Link_Flags)
-	@echo "CC   <=  $<" 
+	$(CC) $(App_C_Flags) -c $< -o $@ $(App_Link_Flags)
 	
 #$(COMMON_ELEOS)/%.o: $(COMMON_ELEOS)/%.cpp
 #	@$(CXX) $(App_Cpp_Flags) -c $< -o $@ $(App_Link_Flags)
 #	@echo "CXX  <=  $<"	
 	
 $(UNTRUSTED_DIR)/%.o: $(UNTRUSTED_DIR)/%.cpp ZT_Untrusted/Enclave_u.o
-	@$(CXX) $(App_Cpp_Flags) -c $< -o $@ $(App_Link_Flags)
-	@echo "CXX  <=  $<"
+	$(CXX) $(App_Cpp_Flags) -c $< -o $@ $(App_Link_Flags)
 	
 #lib_services.untrusted.a: $(UNTRUSTED_DIR)/lib_services_u.o $(Lib_services_Cpp_Objects)
 #	ar rcs lib_services.untrusted.a $(Lib_services_Cpp_Objects) $(UNTRUSTED_DIR)/lib_services_u.o  
@@ -250,19 +242,16 @@ ZT_Untrusted/Enclave_u.c: $(SGX_EDGER8R) ZT_Enclave/Enclave.edl
 	@echo "GEN  =>  $@"
 
 ZT_Untrusted/Enclave_u.o: ZT_Untrusted/Enclave_u.c
-	@$(CC) $(App_C_Flags) -c $< -o $@
-	@echo "CC   <=  $<"
+	$(CC) $(App_C_Flags) -c $< -o $@
 
 ZT_Untrusted/%.o: ZT_Untrusted/%.cpp ZT_Untrusted/Enclave_u.o
-	@$(CXX) $(App_Cpp_Flags) -c $< -o $@
-	@echo "CXX  <=  $<"
+	$(CXX) $(App_Cpp_Flags) -c $< -o $@
 
 $(App_Name): ZT_Untrusted/Enclave_u.o $(App_Cpp_Objects) ZT_Untrusted/Enclave_u.o
 	#To build a stand alone (non-lib) ZeroTrace:
 	#@$(CXX) $^ -o $@ $(App_Link_Flags)
 	#To build a dynamic-linked library ZeroTrace:
-	@$(CXX) $^ -shared -o libZT.so $(App_Link_Flags)
-	@echo "LINK =>  $@"
+	$(CXX) $^ -shared -o libZT.so $(App_Link_Flags)
 	cp libZT.so Sample_App/ 
 	cp libZT.so ../
 	$(MAKE) -C Sample_App/
@@ -278,19 +267,16 @@ ZT_Enclave/Enclave_t.c: $(SGX_EDGER8R) ZT_Enclave/Enclave.edl
 	@echo "GEN  =>  $@"
 
 ZT_Enclave/Enclave_t.o: ZT_Enclave/Enclave_t.c
-	@$(CC) $(Enclave_C_Flags) -c $< -o $@
-	@echo "CC   <=  $<"
-	
+	$(CC) $(Enclave_C_Flags) -c $< -o $@
+
 ZT_Enclave/oblivious_functions.o: ZT_Enclave/oblivious_functions.asm
 	@$(NASM) $(NASM_Flags) $< -o $@
 
 ZT_Enclave/%.o: ZT_Enclave/%.cpp $(Enclave_Asm_Objects) ZT_Enclave/Enclave_t.o
-	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
-	@echo "CXX  <=  $<"
+	$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
 
 $(Enclave_Name): ZT_Enclave/Enclave_t.o $(Enclave_Cpp_Objects) $(Enclave_Asm_Objects)
-	@$(CXX) $^ -o $@ $(Enclave_Link_Flags)
-	@echo "LINK =>  $@"
+	$(CXX) $^ -o $@ $(Enclave_Link_Flags)
 
 $(Signed_Enclave_Name): $(Enclave_Name)
 	@$(SGX_ENCLAVE_SIGNER) sign -key ZT_Enclave/Enclave_private.pem -enclave $(Enclave_Name) -out $@ -config $(Enclave_Config_File)

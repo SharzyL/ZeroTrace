@@ -874,6 +874,7 @@ uint32_t ORAMTree::FillResultBlock(uint32_t id, unsigned char *result_data,
                                    uint32_t block_size) {
   recursive_stash[recursion_levels - 1].ObliviousFillResultData(id,
                                                                 result_data);
+  return 0;
 }
 
 // PathORAM_Access(opType, id_adj, id,leaf, newleaf,

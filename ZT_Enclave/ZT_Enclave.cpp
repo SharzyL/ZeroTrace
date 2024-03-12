@@ -128,7 +128,7 @@ int8_t InitializeKeys(unsigned char *bin_x, unsigned char *bin_y,
 uint32_t getNewORAMInstanceID(uint8_t oram_type) {
   if (oram_type == 0)
     return poram_instance_id++;
-  else if (oram_type == 1)
+  else
     return coram_instance_id++;
 }
 
@@ -168,6 +168,8 @@ uint8_t createNewORAMInstance(uint32_t instance_id, uint32_t max_blocks,
                                recursion_data_size, recursion_levels);
     return 0;
   }
+
+  return 0;
 }
 
 uint32_t createNewLSORAMInstance(uint32_t key_size, uint32_t value_size,
@@ -186,6 +188,7 @@ int8_t LSORAMAccess(uint32_t instance_id, unsigned char *key, uint32_t key_size,
                     unsigned char *value, uint32_t value_size) {
   LinearScan_ORAM *current_instance = lsoram_instances[instance_id];
   // return(current_instance->access(key, key_size, value, value_size));
+  return 0;
 }
 
 int8_t processLSORAMInsert(uint32_t instance_id, unsigned char *key,
@@ -381,6 +384,7 @@ uint32_t parseInsertRequest(unsigned char *request, uint32_t request_size,
 
   *req_value = (unsigned char *)malloc(*req_value_size);
   memcpy(*req_value, req_ptr, *req_value_size);
+  return 0;
 }
 
 uint32_t parseFetchRequest(unsigned char *request, uint32_t request_size,
@@ -392,6 +396,7 @@ uint32_t parseFetchRequest(unsigned char *request, uint32_t request_size,
 
   *req_key = (unsigned char *)malloc(request_size);
   memcpy(*req_key, req_ptr, request_size);
+  return 0;
 }
 
 /*
@@ -511,6 +516,7 @@ uint32_t DecryptRequest(unsigned char *encrypted_request,
   free(bin_x);
   free(bin_y);
   BN_CTX_free(bn_ctx);
+  return 0;
 }
 
 uint32_t EncryptResponse(unsigned char *response, uint32_t response_size,
@@ -523,6 +529,7 @@ uint32_t EncryptResponse(unsigned char *response, uint32_t response_size,
       (const sgx_aes_gcm_128bit_key_t *)aes_key, response, response_size,
       (uint8_t *)encrypted_response, (const uint8_t *)iv, IV_LENGTH, NULL, 0,
       (sgx_aes_gcm_128bit_tag_t *)tag_out);
+  return 0;
 }
 
 int8_t LSORAMFetch(uint32_t instance_id, unsigned char *encrypted_request,
@@ -552,6 +559,7 @@ int8_t LSORAMFetch(uint32_t instance_id, unsigned char *encrypted_request,
   EncryptResponse(response, response_size, aes_key, iv, encrypted_response,
                   tag_out);
   free(response);
+  return 0;
 }
 
 int8_t LSORAMInsert(uint32_t instance_id, unsigned char *encrypted_request,
@@ -577,6 +585,7 @@ int8_t LSORAMInsert(uint32_t instance_id, unsigned char *encrypted_request,
   // LSORAMInsert()
   processLSORAMInsert(instance_id, req_key, req_key_size, req_value,
                       req_value_size);
+  return 0;
 }
 
 int8_t LSORAMInsert_pt(uint32_t instance_id, unsigned char *key,
@@ -584,6 +593,7 @@ int8_t LSORAMInsert_pt(uint32_t instance_id, unsigned char *key,
                        uint32_t value_size) {
 
   processLSORAMInsert(instance_id, key, key_size, value, value_size);
+  return 0;
 }
 
 int8_t HSORAMFetch(uint32_t lsoram_iid, uint32_t oram_iid, uint8_t oram_type,
@@ -632,6 +642,8 @@ int8_t HSORAMFetch(uint32_t lsoram_iid, uint32_t oram_iid, uint8_t oram_type,
                   tag_out);
   free(response);
   free(data_in);
+
+  return 0;
 }
 
 // TODO: HSORAMInsert and HSORAMFetch handling and testing
@@ -681,6 +693,8 @@ int8_t HSORAMInsert(uint32_t lsoram_iid, uint32_t oram_iid, uint8_t oram_type,
     coram_current_instance->Access(oram_index, 'w', req_value, data_out);
   }
   free(data_out);
+
+  return 0;
 }
 
 /*

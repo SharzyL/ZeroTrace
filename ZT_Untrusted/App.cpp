@@ -460,7 +460,7 @@ void *createLSORAM_OCALL(uint32_t id, uint32_t key_size, uint32_t value_size,
   return ((void *)LSORAM_store);
 }
 
-void *insertLSORAM_OCALL() {}
+void *insertLSORAM_OCALL() { return nullptr; }
 
 void myprintf(char *buffer, uint32_t buffer_size) {
   char buff_temp[buffer_size];

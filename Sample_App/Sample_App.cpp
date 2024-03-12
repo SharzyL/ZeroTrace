@@ -172,12 +172,10 @@ int main(int argc, char *argv[]) {
     encrypted_response = (unsigned char *)malloc(response_size);
 
     for (i = 0; i < REQUEST_LENGTH; i++) {
-#ifdef PRINT_REQ_DETAILS
       printf("---------------------------------------------------\n\nRequest "
              "no : %d\n",
              i);
       printf("Access ID: %d\n", rs[i]);
-#endif
 
       // TODO: Patch this along with instances patch
       uint32_t instance_id = 0;
@@ -189,6 +187,7 @@ int main(int argc, char *argv[]) {
                      encrypted_request_size);
       generate_request_stop = clock();
 
+      printf("After encrypt\n");
       // Process Request:
       process_request_start = clock();
       ZT_Access(instance_id, ORAM_TYPE, encrypted_request, encrypted_response,
@@ -196,13 +195,14 @@ int main(int argc, char *argv[]) {
                 TAG_SIZE);
       process_request_stop = clock();
 
+      printf("After access\n");
       // Extract Response:
       extract_response_start = clock();
       extractResponse(encrypted_response, tag_out, response_size, data_out);
       extract_response_stop = clock();
 
       data_out[DATA_SIZE] = '\0';
-      // printf("Obtained data : %s\n", data_out);
+      printf("Obtained data : %s\n", data_out);
 
 #ifdef RESULTS_DEBUG
       printf("datasize = %d, Fetched Data :", DATA_SIZE);
